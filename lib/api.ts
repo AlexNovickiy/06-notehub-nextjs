@@ -5,7 +5,7 @@ const API_KEY = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
 const BASE_URL = 'https://notehub-public.goit.study/api';
 const NOTES_URL = `${BASE_URL}/notes`;
 
-interface FetchNotesResponse {
+export interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
 }
@@ -17,8 +17,8 @@ interface Params {
 }
 
 export async function fetchNotes(
-  page: number = 1,
   searchValue: string = '',
+  page: number = 1,
   perPage: number = 12
 ): Promise<FetchNotesResponse> {
   const params: Params = {

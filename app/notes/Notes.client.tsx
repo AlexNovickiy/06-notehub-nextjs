@@ -9,13 +9,19 @@ import ErrorMessage from '@/components/ErrorMessage/ErrorMessage';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import Pagination from '@/components/Pagination/Pagination';
 import NoteList from '@/components/NoteList/NoteList';
-import NoteModal from '@/components/Modal/NoteModal';
+import NoteModal from '@/components/Modal/Modal';
 
 import { fetchNotes } from '@/lib/api';
 
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import NoteForm from '@/components/NoteForm/NoteForm';
+import type { FetchNotesResponse } from '@/lib/api';
 
-export default function NotesClient() {
+interface NotesClientProps {
+  initialData: FetchNotesResponse;
+}
+
+export default function NotesClient({ initialData }: NotesClientProps) {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [debouncedSearchValue] = useDebounce(searchValue, 1000);
@@ -23,9 +29,13 @@ export default function NotesClient() {
 
   const { data, isFetching, isError, isSuccess } = useQuery({
     queryKey: ['notes', debouncedSearchValue, currentPage],
-    queryFn: () => fetchNotes(currentPage, debouncedSearchValue),
+    queryFn: () => fetchNotes(debouncedSearchValue, currentPage),
     placeholderData: keepPreviousData,
     refetchOnMount: false,
+    initialData:
+      debouncedSearchValue === '' && currentPage === 1
+        ? initialData
+        : undefined,
   });
 
   const handleSearch = (searchValue: string) => {
@@ -58,10 +68,22 @@ export default function NotesClient() {
       </div>
       {isFetching && <Loader />}
       {isError && <ErrorMessage />}
-      {data && isSuccess && data.notes.length > 0 && (
-        <NoteList notes={data.notes} />
+      {data && isSuccess && (
+        <>
+          {data.notes.length > 0 ? (
+            <NoteList notes={data.notes} />
+          ) : (
+            <div className={css.emptyState}>
+              <p>No notes found. Create your first note!</p>
+            </div>
+          )}
+        </>
       )}
-      {isModalOpen && <NoteModal onClose={handleCloseModal} />}
+      {isModalOpen && (
+        <NoteModal onClose={handleCloseModal}>
+          <NoteForm onClose={handleCloseModal} />
+        </NoteModal>
+      )}
     </div>
   );
 }

@@ -29,3 +29,10 @@
 .button:hover {
   background-color: #0b5ed7;
 }
+
+.emptyState {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-size: 18px;
+}
